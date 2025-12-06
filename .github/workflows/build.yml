@@ -15,7 +15,7 @@ jobs:
         docker run --rm \
           -v "$(pwd)":/app \
           -v ~/.buildozer:/home/user/.buildozer \
-          buildozer/buildozer \
+          kivy/buildozer \
           android debug
       
     - name: Upload APK
