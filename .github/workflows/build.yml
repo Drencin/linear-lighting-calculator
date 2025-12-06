@@ -12,9 +12,11 @@ jobs:
       
     - name: Build APK using Buildozer Docker
       run: |
-        echo "y" | docker run --rm -i \
+        # 使用printf确保有换行符
+        printf "y\n" | docker run --rm -i \
           -v "$(pwd)":/app \
           -v ~/.buildozer:/home/user/.buildozer \
+          -w /app \
           kivy/buildozer \
           android debug
       
