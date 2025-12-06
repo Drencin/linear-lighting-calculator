@@ -1,0 +1,25 @@
+name: Build Android APK
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Build APK using Buildozer Docker
+      run: |
+        docker run --rm \
+          -v "$(pwd)":/app \
+          -v ~/.buildozer:/home/user/.buildozer \
+          buildozer/buildozer \
+          android debug
+      
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-apk
+        path: bin/*.apk
