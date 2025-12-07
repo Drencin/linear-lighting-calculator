@@ -9,13 +9,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Prepare directory permissions
+      run: |
+        # 预先创建目录并设置权限
+        mkdir -p ~/.buildozer
+        chmod 777 ~/.buildozer
+        
     - name: Build APK
       run: |
-        # 提供多个y应答所有可能的提示
-        echo -e "y\ny\ny\ny\ny" | docker run --rm -i \
+        docker run --rm \
           -v $PWD:/app \
           -v $HOME/.buildozer:/home/user/.buildozer \
           -w /app \
+          --user $(id -u):$(id -g) \
           kivy/buildozer \
           buildozer android debug
           
