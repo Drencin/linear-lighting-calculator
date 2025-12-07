@@ -9,15 +9,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Run Buildozer in Docker
+    - name: Build APK
       run: |
         docker run --rm \
           -v $PWD:/app \
           -v $HOME/.buildozer:/home/user/.buildozer \
-          -e PACKAGES=$PACKAGES \
-          -e ANDROID_HOME=/home/user/.buildozer/android/platform/android-sdk \
+          -e "BUILDOZER_NO_ROOT_CHECK=1" \
+          -e "CI=true" \
+          -w /app \
           kivy/buildozer \
-          bash -c "yes | buildozer android debug"
+          buildozer android debug
           
     - name: Upload APK
       uses: actions/upload-artifact@v4
