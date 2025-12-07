@@ -9,16 +9,54 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Create bypass script
+      run: |
+        cat > bypass_root.py << 'EOF'
+import subprocess
+import sys
+import select
+
+# 启动buildozer进程
+proc = subprocess.Popen(
+    ['buildozer', 'android', 'debug'],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True
+)
+
+# 自动回答所有'y'提示
+while True:
+    # 检查输出
+    ready, _, _ = select.select([proc.stdout], [], [], 0.1)
+    if ready:
+        line = proc.stdout.readline()
+        if not line:
+            break
+        print(line, end='')
+        if 'Are you sure you want to continue' in line:
+            proc.stdin.write('y\n')
+            proc.stdin.flush()
+    
+    # 检查进程是否结束
+    if proc.poll() is not None:
+        break
+
+# 获取剩余输出
+for line in proc.stdout:
+    print(line, end='')
+
+sys.exit(proc.returncode)
+EOF
+        
     - name: Build APK
       run: |
-        # 终极方案：root+自动应答+强制环境
         docker run --rm \
           -v $PWD:/app \
           -v $HOME/.buildozer:/home/user/.buildozer \
           -w /app \
-          -e "PIP_ROOT_USER_ACTION=ignore" \
           kivy/buildozer \
-          bash -c "echo 'y' | buildozer android debug 2>&1 | grep -v 'running as root' || true; exit 0"
+          bash -c "python3 bypass_root.py"
           
     - name: Upload APK
       uses: actions/upload-artifact@v4
