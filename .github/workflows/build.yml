@@ -14,9 +14,8 @@ jobs:
         docker run --rm \
           -v $PWD:/app \
           -v $HOME/.buildozer:/home/user/.buildozer \
-          -e "BUILDOZER_NO_ROOT_CHECK=1" \
-          -e "CI=true" \
           -w /app \
+          --user 1000:1000 \
           kivy/buildozer \
           buildozer android debug
           
